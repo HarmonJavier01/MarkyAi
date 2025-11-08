@@ -30,7 +30,7 @@ export function HomeView({ user, generatedImages }: HomeViewProps) {
       </div>
       
       <div className="space-y-3">
-        <h1 className="text-5xl font-bold">Welcome back, {user?.displayName || user?.email?.split('@')[0] || 'there'}! 👋</h1>
+        <h1 className="text-5xl font-bold">Welcome back, {user?.displayName || user?.email?.split('@')[0] || 'there'}! </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Ready to create stunning marketing content? Start by describing what you need below.
         </p>
@@ -38,19 +38,19 @@ export function HomeView({ user, generatedImages }: HomeViewProps) {
 
       <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto mt-12">
         <div className="p-6 bg-gradient-to-br from-surface-purple to-purple-100 rounded-xl hover:shadow-md transition-shadow cursor-pointer">
-          <div className="text-3xl mb-3">📱</div>
+          <div className="text-3xl mb-3 emoji-bounce">📱</div>
           <h3 className="font-semibold mb-2">Social Media</h3>
           <p className="text-sm text-muted-foreground">Instagram, Facebook, and more</p>
         </div>
 
         <div className="p-6 bg-gradient-to-br from-surface-pink to-pink-100 rounded-xl hover:shadow-md transition-shadow cursor-pointer">
-          <div className="text-3xl mb-3">📢</div>
+          <div className="text-3xl mb-3 emoji-bounce">📢</div>
           <h3 className="font-semibold mb-2">Advertising</h3>
           <p className="text-sm text-muted-foreground">Banners and ad creatives</p>
         </div>
 
         <div className="p-6 bg-gradient-to-br from-surface-blue to-blue-100 rounded-xl hover:shadow-md transition-shadow cursor-pointer">
-          <div className="text-3xl mb-3">📦</div>
+          <div className="text-3xl mb-3 emoji-bounce">📦</div>
           <h3 className="font-semibold mb-2">Product Photos</h3>
           <p className="text-sm text-muted-foreground">Showcase your products</p>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Onboarding } from "@/components/Onboarding";
 import { MainApp } from "@/components/MainApp";
+import { User } from "firebase/auth";
 
 interface UserData {
   name: string;
@@ -17,23 +18,29 @@ interface UserData {
   frequency: string;
 }
 
-const Index = () => {
+interface IndexProps {
+  user: User | null;
+}
+
+const Index = ({ user }: IndexProps) => {
   const [showOnboarding, setShowOnboarding] = useState(true);
-  const [user, setUser] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
-    const hasCompletedOnboarding = localStorage.getItem('marky_onboarding_complete');
-    if (hasCompletedOnboarding) {
-      setShowOnboarding(false);
-      const userData = JSON.parse(localStorage.getItem('marky_user_data') || '{}');
-      setUser(userData);
+    if (user) {
+      const hasCompletedOnboarding = localStorage.getItem(`marky_onboarding_complete_${user.uid}`);
+      if (hasCompletedOnboarding) {
+        setShowOnboarding(false);
+        const data = JSON.parse(localStorage.getItem(`marky_user_data_${user.uid}`) || '{}');
+        setUserData(data);
+      }
     }
-  }, []);
+  }, [user]);
 
-  const handleOnboardingComplete = (userData: UserData) => {
+  const handleOnboardingComplete = (data: UserData) => {
     localStorage.setItem('marky_onboarding_complete', 'true');
-    localStorage.setItem('marky_user_data', JSON.stringify(userData));
-    setUser(userData);
+    localStorage.setItem('marky_user_data', JSON.stringify(data));
+    setUserData(data);
     setShowOnboarding(false);
   };
 
@@ -41,7 +48,7 @@ const Index = () => {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  return <MainApp user={user} onResetOnboarding={() => setShowOnboarding(true)} />;
+  return <MainApp user={user} userData={userData} onResetOnboarding={() => setShowOnboarding(true)} />;
 };
 
 export default Index;

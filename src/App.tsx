@@ -47,7 +47,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={user ? <Index /> : <Login />} />
+            <Route path="/" element={user ? <Index user={user} /> : <Login />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

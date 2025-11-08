@@ -35,39 +35,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             M
           </div>
           <p className="text-lg text-muted-foreground max-w-md mx-auto">
-            Create stunning marketing images, ads, and social media content with AI. 
+            Create stunning marketing images, ads, and social media content with AI.
             Tailored specifically for your brand and industry.
           </p>
-        </div>
-      )
-    },
-    {
-      title: "Tell us about yourself",
-      subtitle: "Help us personalize your experience",
-      content: (
-        <div className="space-y-4 max-w-md mx-auto">
-          <div>
-            <Label htmlFor="name">Your Name</Label>
-            <Input
-              id="name"
-              type="text"
-              value={userData.name}
-              onChange={(e) => setUserData({...userData, name: e.target.value})}
-              placeholder="Enter your name"
-              className="mt-2"
-            />
-          </div>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={userData.email}
-              onChange={(e) => setUserData({...userData, email: e.target.value})}
-              placeholder="your@email.com"
-              className="mt-2"
-            />
-          </div>
         </div>
       )
     },
@@ -315,14 +285,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   const canProceed = () => {
-    if (step === 1) return userData.name && userData.email;
-    if (step === 2) return userData.role;
-    if (step === 3) return userData.industry;
-    if (step === 4) return userData.niche;
-    if (step === 5) return userData.useCases.length > 0;
-    if (step === 6) return userData.platforms.length > 0;
-    if (step === 7) return userData.imageTypes.length > 0;
-    if (step === 8) return userData.brandStyle.length > 0;
+    if (step === 1) return userData.role;
+    if (step === 2) return userData.industry;
+    if (step === 3) return userData.niche;
+    if (step === 4) return userData.useCases.length > 0;
+    if (step === 5) return userData.platforms.length > 0;
+    if (step === 6) return userData.imageTypes.length > 0;
+    if (step === 7) return userData.brandStyle.length > 0;
     return true;
   };
 

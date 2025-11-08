@@ -4,16 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle forgot password logic
-    console.log('Reset password for:', email);
-    setSubmitted(true);
+    setError('');
+
+    try {
+      // Send password reset email using Firebase
+      await sendPasswordResetEmail(auth, email);
+      console.log('Password reset email sent to:', email);
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send password reset email';
+      setError(errorMessage);
+    }
   };
 
   return (
@@ -25,9 +37,9 @@ export default function ForgotPassword() {
           </div>
           <h1 className="text-3xl font-bold mb-2">Reset Password</h1>
           <p className="text-muted-foreground">
-            {submitted 
-              ? "Check your email for reset instructions"
-              : "Enter your email to receive reset instructions"}
+            {submitted
+              ? "Password reset email sent successfully"
+              : "Enter your email to receive a password reset link"}
           </p>
         </div>
 
@@ -46,18 +58,29 @@ export default function ForgotPassword() {
               />
             </div>
 
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
             <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent">
-              Send Reset Link
+              Send Reset Email
             </Button>
           </form>
         ) : (
           <div className="text-center space-y-4">
-            <div className="w-16 h-16 mx-auto bg-surface-purple rounded-full flex items-center justify-center text-3xl">
-              ✉️
+            <div className="w-16 h-16 mx-auto bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center text-3xl">
+              ✓
             </div>
             <p className="text-muted-foreground">
-              We've sent password reset instructions to <strong>{email}</strong>
+              Password reset email sent to <strong>{email}</strong>!
             </p>
+            <Link to="/login">
+              <Button className="w-full bg-gradient-to-r from-primary to-accent">
+                Go to Login
+              </Button>
+            </Link>
           </div>
         )}
 

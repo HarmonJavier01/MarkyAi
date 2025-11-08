@@ -1,6 +1,7 @@
-import { Home, Image, Clock, Settings, LogOut } from "lucide-react";
+import { Home, Image, Clock, Settings, LogOut, Edit, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
@@ -15,9 +16,10 @@ interface SidebarProps {
   currentView: string;
   onNavigate: (view: string) => void;
   user: User;
+  onResetOnboarding: () => void;
 }
 
-export function Sidebar({ currentView, onNavigate, user }: SidebarProps) {
+export function Sidebar({ currentView, onNavigate, user, onResetOnboarding }: SidebarProps) {
   const navigate = useNavigate();
 
   const navItems = [
@@ -80,14 +82,27 @@ export function Sidebar({ currentView, onNavigate, user }: SidebarProps) {
             <div className="text-sm font-medium truncate">{user?.displayName || user?.email?.split('@')[0] || 'User'}</div>
             <div className="text-xs text-muted-foreground truncate">{user?.email || 'user@email.com'}</div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleSignOut}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onResetOnboarding}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Onboarding
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>
