@@ -1,14 +1,8 @@
-# TODO: Update Image Generation to Use Google AI Studio API
+# TODO: Update Image Generation to Use Google AI Studio Imagen API
 
-- [x] Update supabase/functions/generate-image/index.ts to use Google AI Studio Imagen API
-- [x] Remove Pollination API requirement
-- [x] Update MainApp.tsx to use Supabase function instead of direct API calls (fixes CORS)
-- [x] Test the updated function to ensure it works without 402 error
-
-# TODO: Update Supabase Project Configuration
-
-- [x] Update supabase/config.toml to use new project ID
-- [x] Create .env file with new Supabase credentials
-- [x] Restart development server
-- [x] Deploy the updated Supabase function to the new project
-- [x] Test the app with the new Supabase project
+- [x] Update supabase/functions/generate-image/index.ts to use Google AI Studio Imagen API with model imagen-3.0-generate-001
+- [x] Change endpoint from Gemini to Imagen API
+- [x] Update request body format for Imagen
+- [x] Adjust response parsing to extract base64 image from Imagen response
+- [x] Deploy the updated Supabase function
+- [ ] Test image generation to ensure it works

@@ -1,7 +1,6 @@
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 interface RightPanelProps {
   settings: {
     temperature: number;
@@ -10,8 +9,34 @@ interface RightPanelProps {
   };
   setSettings: (settings: unknown) => void;
 }
-
 export function RightPanel({ settings, setSettings }: RightPanelProps) {
+  const handleOutputTypeChange = (value: string) => {
+    let newAspectRatio = settings.aspectRatio;
+    
+    switch (value) {
+      case "General":
+        newAspectRatio = "Auto";
+        break;
+      case "Image Ads":
+        newAspectRatio = "1:1";
+        break;
+      case "Banner Image":
+        newAspectRatio = "16:9";
+        break;
+      case "Product Image":
+        newAspectRatio = "1:1";
+        break;
+      case "Social Media Square":
+        newAspectRatio = "1:1";
+        break;
+      case "Social Media Story":
+        newAspectRatio = "9:16";
+        break;
+    }
+    
+    setSettings({ ...settings, outputType: value, aspectRatio: newAspectRatio });
+  };
+
   return (
     <div className="w-80 border-l border-border overflow-y-auto bg-background">
       <div className="p-6 space-y-6">
@@ -21,7 +46,6 @@ export function RightPanel({ settings, setSettings }: RightPanelProps) {
             Customize your image generation parameters
           </p>
         </div>
-
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -39,12 +63,11 @@ export function RightPanel({ settings, setSettings }: RightPanelProps) {
               Higher values create more creative results
             </p>
           </div>
-
           <div>
             <Label className="mb-2 block">Output Type</Label>
             <Select
               value={settings.outputType}
-              onValueChange={(value) => setSettings({ ...settings, outputType: value })}
+              onValueChange={handleOutputTypeChange}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -59,7 +82,6 @@ export function RightPanel({ settings, setSettings }: RightPanelProps) {
               </SelectContent>
             </Select>
           </div>
-
           <div>
             <Label className="mb-2 block">Aspect Ratio</Label>
             <Select
@@ -80,7 +102,6 @@ export function RightPanel({ settings, setSettings }: RightPanelProps) {
             </Select>
           </div>
         </div>
-
         <div className="pt-6 border-t border-border">
           <h3 className="font-medium mb-2">Quick Tips</h3>
           <ul className="text-sm text-muted-foreground space-y-2">

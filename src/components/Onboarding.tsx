@@ -3,11 +3,9 @@ import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 interface OnboardingProps {
   onComplete: (userData: unknown) => void;
 }
-
 export function Onboarding({ onComplete }: OnboardingProps) {
   const [step, setStep] = useState(0);
   const [userData, setUserData] = useState({
@@ -24,7 +22,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     goals: [] as string[],
     frequency: ''
   });
-
+  const [otherIndustry, setOtherIndustry] = useState('');
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
+  
   const steps = [
     {
       title: "Welcome to Marky AI Studio",
@@ -73,24 +73,61 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       title: "What industry are you in?",
       subtitle: "This helps us understand your visual needs",
       content: (
-        <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
-          {[
-            'E-commerce/Retail', 'Food & Beverage', 'Real Estate', 'Health & Wellness',
-            'Technology/SaaS', 'Fashion & Beauty', 'Finance/Insurance', 'Education',
-            'Hospitality/Travel', 'Professional Services'
-          ].map((industry) => (
-            <button
-              key={industry}
-              onClick={() => setUserData({...userData, industry})}
-              className={`p-4 border-2 rounded-lg transition-all text-sm ${
-                userData.industry === industry
-                  ? 'border-primary bg-surface-purple'
-                  : 'border-border hover:border-primary/50'
-              }`}
-            >
-              {industry}
-            </button>
-          ))}
+        <div className="space-y-4 max-w-2xl mx-auto">
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              'E-commerce', 'Food & Beverage', 'Real Estate', 'Health', 'Technology',
+              'Fashion & Beauty', 'Finance', 'Education', 'Travel', 'Services', 'Other'
+            ].map((industry) => (
+              <button
+                key={industry}
+                onClick={() => {
+                  if (industry === 'Other') {
+                    setIsOtherSelected(true);
+                    setUserData({...userData, industry: otherIndustry});
+                  } else {
+                    setIsOtherSelected(false);
+                    setOtherIndustry('');
+                    setUserData({...userData, industry});
+                  }
+                }}
+                className={`p-3 border-2 rounded-lg transition-all text-sm ${
+                  industry === 'Other' 
+                    ? isOtherSelected
+                      ? 'border-primary bg-surface-purple' 
+                      : 'border-border hover:border-primary/50'
+                    : userData.industry === industry
+                      ? 'border-primary bg-surface-purple'
+                      : 'border-border hover:border-primary/50'
+                }`}
+              >
+                {industry}
+              </button>
+            ))}
+          </div>
+          
+          {/* Other industry input - only shown if Other is selected */}
+          {isOtherSelected && (
+            <div className="space-y-2 pt-3">
+              <Input
+                placeholder="What's your industry?"
+                value={otherIndustry}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setOtherIndustry(value);
+                  setUserData({...userData, industry: value});
+                }}
+                className="w-full max-w-md mx-auto"
+              />
+              <p className="text-xs text-center text-muted-foreground">
+                Be specific, e.g., "Automotive", "Non-profit", "Entertainment"
+              </p>
+            </div>
+          )}
+          
+          <div className="text-xs text-center text-muted-foreground">
+            Select "Other" to specify your industry if not listed above
+          </div>
         </div>
       )
     },
@@ -135,7 +172,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               }`}
             >
               <span>{useCase}</span>
-              {userData.useCases.includes(useCase) && <Check className="w-4 h-4 text-primary" />}
+              {userData.useCases.includes(useCase) && <Check className="w-4 h-4 text-primary check-bounce" />}
             </button>
           ))}
         </div>
@@ -165,7 +202,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               }`}
             >
               <span>{platform}</span>
-              {userData.platforms.includes(platform) && <Check className="w-4 h-4 text-primary" />}
+              {userData.platforms.includes(platform) && <Check className="w-4 h-4 text-primary check-bounce" />}
             </button>
           ))}
         </div>
@@ -195,7 +232,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               }`}
             >
               <span>{type}</span>
-              {userData.imageTypes.includes(type) && <Check className="w-4 h-4 text-primary" />}
+              {userData.imageTypes.includes(type) && <Check className="w-4 h-4 text-primary check-bounce" />}
             </button>
           ))}
         </div>
@@ -228,7 +265,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               disabled={userData.brandStyle.length >= 3 && !userData.brandStyle.includes(style)}
             >
               <span>{style}</span>
-              {userData.brandStyle.includes(style) && <Check className="w-4 h-4 text-primary" />}
+              {userData.brandStyle.includes(style) && <Check className="w-4 h-4 text-primary check-bounce" />}
             </button>
           ))}
         </div>
@@ -240,7 +277,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       content: (
         <div className="text-center space-y-6 max-w-md mx-auto">
           <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
-            <Check className="w-12 h-12 text-white" />
+            <Check className="w-12 h-12 text-white check-bounce" />
           </div>
           <div className="space-y-4">
             <h3 className="text-xl font-semibold">Welcome, {userData.name || 'there'}!</h3>
@@ -249,21 +286,21 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             </p>
             <div className="grid gap-3 text-left">
               <div className="flex items-start space-x-3 p-4 bg-surface-purple rounded-lg">
-                <div className="text-2xl">📱</div>
+                <div className="text-2xl emoji-bounce">📱</div>
                 <div>
                   <div className="font-medium">Social Media Content</div>
                   <div className="text-sm text-muted-foreground">Stories, posts, and ads</div>
                 </div>
               </div>
               <div className="flex items-start space-x-3 p-4 bg-surface-pink rounded-lg">
-                <div className="text-2xl">🎨</div>
+                <div className="text-2xl emoji-bounce">🎨</div>
                 <div>
                   <div className="font-medium">Marketing Materials</div>
                   <div className="text-sm text-muted-foreground">Banners, ads, and promotions</div>
                 </div>
               </div>
               <div className="flex items-start space-x-3 p-4 bg-surface-blue rounded-lg">
-                <div className="text-2xl">📦</div>
+                <div className="text-2xl emoji-bounce">📦</div>
                 <div>
                   <div className="font-medium">Product Images</div>
                   <div className="text-sm text-muted-foreground">Showcase your products beautifully</div>
@@ -275,7 +312,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       )
     }
   ];
-
+  
   const handleNext = () => {
     if (step === steps.length - 1) {
       onComplete(userData);
@@ -283,10 +320,10 @@ export function Onboarding({ onComplete }: OnboardingProps) {
       setStep(step + 1);
     }
   };
-
+  
   const canProceed = () => {
     if (step === 1) return userData.role;
-    if (step === 2) return userData.industry;
+    if (step === 2) return !!userData.industry; // Requires industry to be set (predefined or custom)
     if (step === 3) return userData.niche;
     if (step === 4) return userData.useCases.length > 0;
     if (step === 5) return userData.platforms.length > 0;
@@ -294,7 +331,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
     if (step === 7) return userData.brandStyle.length > 0;
     return true;
   };
-
+  
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-surface-purple via-surface-pink to-surface-blue z-50 flex items-center justify-center p-4">
       <div className="bg-background rounded-2xl shadow-xl max-w-4xl w-full p-8 relative">
@@ -314,7 +351,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             Step {step + 1} of {steps.length}
           </div>
         </div>
-
         {/* Content */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-center mb-2">{steps[step].title}</h2>
@@ -323,7 +359,6 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             {steps[step].content}
           </div>
         </div>
-
         {/* Navigation */}
         <div className="flex justify-between items-center">
           <Button

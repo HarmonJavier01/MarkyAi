@@ -30,7 +30,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt } = await req.json();
+    const { prompt, temperature } = await req.json();
     
     if (!prompt) {
       console.error('❌ No prompt provided');
@@ -43,16 +43,17 @@ serve(async (req) => {
       );
     }
 
-    console.log('🎨 Generating image with Google Gemini 2.5 Flash');
+    console.log('🎨 Generating image with Google AI Studio Imagen (Nano Banana style)');
     console.log('📝 Prompt:', prompt);
 
     // ============================================
-    // GOOGLE GEMINI 2.5 FLASH API CONFIGURATION
+    // GOOGLE AI STUDIO IMAGEN API CONFIGURATION (Nano Banana style)
     // ============================================
-
+    // Using Google AI Studio Imagen API for high-quality image generation
+    // "Nano Banana" refers to lightweight, fast image gen optimized for marketing (custom naming)
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
-      console.error('❌ Gemini API key not configured');
+      console.error('❌ Imagen API key not configured');
       return new Response(
         JSON.stringify({ error: 'Image generation service not configured' }),
         {
@@ -62,28 +63,28 @@ serve(async (req) => {
       );
     }
 
-    const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
+    // Imagen API endpoint for image generation
+    const IMAGEN_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${GEMINI_API_KEY}`;
 
-    // Prepare request body for Gemini 2.5 Flash
-    const requestBody = {
-      contents: [{
-        parts: [{
-          text: prompt
-        }]
-      }],
-      generationConfig: {
-        responseModalities: ["text", "image"]
-      }
-    };
+    // Prepare request body for Imagen API (Nano Banana optimized)
+    // const requestBody = {
+    //   prompt: {
+    //     text: `Generate a vibrant, professional marketing image using Nano Banana style: ${prompt}. Optimize for social media ads with bright colors, clean composition, and engaging visuals.`
+    //   },
+    //   sampleCount: 1,
+    //   aspectRatio: "1:1",
+    //   safetyFilterLevel: "block_only_high",
+    //   personGeneration: "allow_adult"
+    // };
 
-    console.log('📡 Calling Google Gemini 2.5 Flash API...');
+    console.log('📡 Calling Google AI Studio Imagen API (Nano Banana style)...');
 
-    // Make request to Gemini API
-    const response = await fetch(GEMINI_ENDPOINT, {
+    // Make request to Imagen API
+    const response = await fetch(IMAGEN_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Marky-AI-Studio/1.0',
+        'User-Agent': 'Marky-AI-Studio/1.0 (Google AI Studio Nano Banana Imagen)',
       },
       body: JSON.stringify(requestBody),
     });
@@ -93,9 +94,8 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Gemini API error:', response.status);
+      console.error('❌ Imagen API error:', response.status);
       console.error('Error details:', errorText);
-
       return new Response(
         JSON.stringify({
           error: `Image generation failed with status ${response.status}`,
@@ -109,33 +109,30 @@ serve(async (req) => {
       );
     }
 
-    // Parse the Gemini response
+    // Parse the Imagen response
     const responseData = await response.json();
-
     console.log('📦 Response data structure:', Object.keys(responseData));
 
-    // Extract image from Gemini response
-    // Gemini returns: { candidates: [{ content: { parts: [{ text: "...", inlineData: { mimeType: "...", data: "..." } }] } }] }
+    // Extract image from Imagen response
+    // Imagen returns: { predictions: [{ bytesBase64Encoded: "..." }] }
     let imageUrl;
-    if (responseData.candidates && responseData.candidates.length > 0) {
-      const content = responseData.candidates[0].content;
-      if (content && content.parts && content.parts.length > 0) {
-        const part = content.parts.find(p => p.inlineData);
-        if (part && part.inlineData) {
-          const mimeType = part.inlineData.mimeType || 'image/png';
-          const base64Data = part.inlineData.data;
-          imageUrl = `data:${mimeType};base64,${base64Data}`;
-        }
+    if (responseData.predictions && responseData.predictions.length > 0) {
+      const prediction = responseData.predictions[0];
+      if (prediction && prediction.bytesBase64Encoded) {
+        const base64Data = prediction.bytesBase64Encoded;
+        imageUrl = `data:image/png;base64,${base64Data}`;
+        console.log('🖼️ Image extracted from Imagen response (Nano Banana style)');
       }
     }
 
     if (!imageUrl) {
-      console.error('❌ Could not find image in Gemini response');
+      console.error('❌ Could not find image in Imagen response');
       console.error('Response data:', JSON.stringify(responseData, null, 2));
       return new Response(
         JSON.stringify({
-          error: 'Could not extract image from Gemini API response',
-          responseStructure: Object.keys(responseData)
+          error: 'Could not extract image from Google AI Studio Imagen response',
+          responseStructure: Object.keys(responseData),
+          prompt: prompt
         }),
         {
           status: 500,
@@ -146,17 +143,15 @@ serve(async (req) => {
 
     // If imageUrl is a URL (not base64), fetch and convert it
     if (imageUrl.startsWith('http')) {
-      console.log('🌐 Fetching image from URL...');
+      console.log('🌐 Fetching image from URL (Google AI Studio generated)...');
       const imageResponse = await fetch(imageUrl);
       
       if (!imageResponse.ok) {
-        throw new Error('Failed to fetch generated image');
+        throw new Error(`Failed to fetch generated image from ${imageUrl}`);
       }
-
       const arrayBuffer = await imageResponse.arrayBuffer();
       const sizeInMB = (arrayBuffer.byteLength / 1024 / 1024).toFixed(2);
       console.log(`📦 Image size: ${sizeInMB} MB`);
-
       if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
         console.error('❌ Image too large:', sizeInMB, 'MB');
         return new Response(
@@ -170,28 +165,26 @@ serve(async (req) => {
           }
         );
       }
-
       const base64 = arrayBufferToBase64(arrayBuffer);
       const contentType = imageResponse.headers.get('content-type') || 'image/png';
       imageUrl = `data:${contentType};base64,${base64}`;
     }
 
-    console.log('✅ Image generated successfully!');
-
+    console.log('✅ Image generated successfully with Google AI Studio Imagen (Nano Banana style)!');
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         imageUrl,
         textContent: prompt,
         prompt,
+        model: 'nano-banana-imagen-3.0-generate-001'
       }),
       {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
-
   } catch (error) {
-    console.error('❌ Error in generate-image function:', error);
+    console.error('❌ Error in generate-image function (Google AI Studio Nano Banana Imagen):', error);
     console.error('Stack trace:', error.stack);
     
     const errorMessage = error instanceof Error ? error.message : 'Failed to generate image';
