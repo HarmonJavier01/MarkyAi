@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Onboarding } from "@/components/Onboarding";
 import { MainApp } from "@/components/MainApp";
-import { User } from "firebase/auth";
+import { User } from "@supabase/supabase-js";
+import { auth } from "@/lib/neon";
 
 interface UserData {
   name: string;
@@ -18,20 +19,31 @@ interface UserData {
   frequency: string;
 }
 
-interface IndexProps {
-  user: User | null;
-}
-
-const Index = ({ user }: IndexProps) => {
+const Index = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
+    // Get initial session
+    auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
     if (user) {
-      const hasCompletedOnboarding = localStorage.getItem(`marky_onboarding_complete_${user.uid}`);
+      const hasCompletedOnboarding = localStorage.getItem(`marky_onboarding_complete_${user.id}`);
       if (hasCompletedOnboarding) {
         setShowOnboarding(false);
-        const data = JSON.parse(localStorage.getItem(`marky_user_data_${user.uid}`) || '{}');
+        const data = JSON.parse(localStorage.getItem(`marky_user_data_${user.id}`) || '{}');
         setUserData(data);
       }
     }

@@ -122,9 +122,7 @@ export function PromptInput({
             className="hidden"
           />
 
-          <Button variant="ghost" size="icon">
-            <HelpCircle className="w-5 h-5" />
-          </Button>
+          
           <Button
             onClick={onGenerate}
             disabled={isGenerating || !prompt.trim()}

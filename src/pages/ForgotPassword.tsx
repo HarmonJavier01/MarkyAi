@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
-import { auth } from "@/lib/firebase";
-import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/neon";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -17,8 +16,10 @@ export default function ForgotPassword() {
     setError('');
 
     try {
-      // Send password reset email using Firebase
-      await sendPasswordResetEmail(auth, email);
+      // Send password reset email using Neon Auth
+      await auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/forgot-password`
+      });
       console.log('Password reset email sent to:', email);
       setSubmitted(true);
     } catch (error) {

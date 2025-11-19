@@ -1,8 +1,20 @@
-# TODO: Update Image Generation to Use Google AI Studio Imagen API
+# Switch from Firebase Auth to Neon Auth
 
-- [x] Update supabase/functions/generate-image/index.ts to use Google AI Studio Imagen API with model imagen-3.0-generate-001
-- [x] Change endpoint from Gemini to Imagen API
-- [x] Update request body format for Imagen
-- [x] Adjust response parsing to extract base64 image from Imagen response
-- [x] Deploy the updated Supabase function
-- [ ] Test image generation to ensure it works
+## Tasks
+
+- [x] Create src/lib/neon.ts to replace firebase.ts
+- [x] Update src/pages/Login.tsx to use Supabase auth
+- [x] Update src/pages/Signup.tsx to use Supabase auth
+- [x] Update src/App.tsx to use Supabase auth
+- [x] Update src/components/Sidebar.tsx to use Supabase auth
+- [x] Update src/components/MainApp.tsx to use Supabase auth
+- [x] Update src/pages/Index.tsx to use Supabase auth
+- [x] Update src/pages/ForgotPassword.tsx to use Supabase auth
+- [x] Remove Firebase dependency from package.json
+- [x] Test authentication flow
+- [x] Fix Stack Auth errors in Index.tsx
+- [x] Update user types throughout the app
+- [x] Fix user display in Sidebar component
+- [x] Removed ResetPassword page - using forgot-password page for reset flow
+- [x] Updated routing to remove /reset-password route
+- [x] Updated forgot password redirect to forgot-password page

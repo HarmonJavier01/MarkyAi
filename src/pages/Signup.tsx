@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { auth, googleProvider } from "@/lib/neon";
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -25,7 +24,16 @@ export default function Signup() {
     }
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const { error } = await auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+          }
+        }
+      });
+      if (error) throw error;
       navigate('/');
     } catch (error) {
       console.error('Signup error:', error);
@@ -38,8 +46,18 @@ export default function Signup() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
-      navigate('/');
+      const { error } = await auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
+        }
+      });
+      if (error) throw error;
+      // OAuth will redirect, so we don't navigate here
     } catch (error) {
       console.error('Google sign-in error:', error);
       alert(`Google sign-in failed: ${(error as Error).message}`);

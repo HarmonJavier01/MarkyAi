@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { auth, googleProvider } from "@/lib/neon";
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -18,7 +17,11 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { error } = await auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
@@ -29,17 +32,22 @@ export default function Login() {
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      await signInWithPopup(auth, googleProvider);
-      navigate('/');
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      alert(`Google sign-in failed: ${(error as Error).message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const { error } = await auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`, // or `/dashboard` etc.
+      }
+    });
+    if (error) throw error;
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    alert(`Google sign-in failed: ${(error as Error).message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-purple via-surface-pink to-surface-blue flex items-center justify-center p-4">

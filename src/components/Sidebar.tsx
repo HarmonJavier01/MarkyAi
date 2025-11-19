@@ -2,15 +2,9 @@ import { Home, Image, Clock, Settings, LogOut, Edit, ChevronDown } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/lib/neon";
 import { useNavigate } from "react-router-dom";
-
-interface User {
-  name?: string;
-  email?: string;
-  displayName?: string;
-}
+import { User } from "@supabase/supabase-js";
 
 interface SidebarProps {
   currentView: string;
@@ -31,7 +25,8 @@ export function Sidebar({ currentView, onNavigate, user, onResetOnboarding }: Si
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      const { error } = await auth.signOut();
+      if (error) throw error;
       navigate('/login');
     } catch (error) {
       console.error('Sign out error:', error);
@@ -75,11 +70,11 @@ export function Sidebar({ currentView, onNavigate, user, onResetOnboarding }: Si
         <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer">
           <Avatar>
             <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white">
-              {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+              {user?.user_metadata?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate">{user?.displayName || user?.email?.split('@')[0] || 'User'}</div>
+            <div className="text-sm font-medium truncate">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}</div>
             <div className="text-xs text-muted-foreground truncate">{user?.email || 'user@email.com'}</div>
           </div>
           <DropdownMenu>

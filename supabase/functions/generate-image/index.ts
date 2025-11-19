@@ -6,6 +6,11 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
 
+// Cloudinary configuration
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload';
+const CLOUDINARY_API_KEY = '727999818853392';
+const CLOUDINARY_API_SECRET = 'WfK4SplbLf_c1QTngBpzSJ7dPT8';
+
 // Helper function to convert ArrayBuffer to base64
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
@@ -33,7 +38,6 @@ serve(async (req) => {
     const { prompt, temperature } = await req.json();
     
     if (!prompt) {
-      console.error('❌ No prompt provided');
       return new Response(
         JSON.stringify({ error: 'Prompt is required' }),
         { 
@@ -43,159 +47,85 @@ serve(async (req) => {
       );
     }
 
-    console.log('🎨 Generating image with Google AI Studio Imagen (Nano Banana style)');
-    console.log('📝 Prompt:', prompt);
-
-    // ============================================
-    // GOOGLE AI STUDIO IMAGEN API CONFIGURATION (Nano Banana style)
-    // ============================================
-    // Using Google AI Studio Imagen API for high-quality image generation
-    // "Nano Banana" refers to lightweight, fast image gen optimized for marketing (custom naming)
+    // Generate image with Google AI Studio Imagen API (High-quality model)
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
-      console.error('❌ Imagen API key not configured');
-      return new Response(
-        JSON.stringify({ error: 'Image generation service not configured' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Imagen API endpoint for image generation
     const IMAGEN_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${GEMINI_API_KEY}`;
 
-    // Prepare request body for Imagen API (Nano Banana optimized)
     // const requestBody = {
     //   prompt: {
-    //     text: `Generate a vibrant, professional marketing image using Nano Banana style: ${prompt}. Optimize for social media ads with bright colors, clean composition, and engaging visuals.`
+    //     text: `Create an ultra-high-resolution, crystal-clear, professionally detailed marketing image with perfectly readable text based on this description: ${prompt}. Generate exceptional quality image with ultra-sharp details, completely legible text, vibrant colors, and photorealistic precision optimized for high-resolution display and professional marketing use. Ensure all text is perfectly readable, details are crisp and clear, and the image quality is suitable for large-scale printing and digital marketing.`
     //   },
     //   sampleCount: 1,
     //   aspectRatio: "1:1",
     //   safetyFilterLevel: "block_only_high",
-    //   personGeneration: "allow_adult"
+    //   personGeneration: "allow_adult",
+    //   outputOptions: {
+    //     mimeType: "image/png"
+    //   }
     // };
 
-    console.log('📡 Calling Google AI Studio Imagen API (Nano Banana style)...');
-
-    // Make request to Imagen API
     const response = await fetch(IMAGEN_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Marky-AI-Studio/1.0 (Google AI Studio Nano Banana Imagen)',
       },
       body: JSON.stringify(requestBody),
     });
 
-    console.log('📊 Response status:', response.status);
-    console.log('📋 Content-Type:', response.headers.get('content-type'));
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Imagen API error:', response.status);
-      console.error('Error details:', errorText);
-      return new Response(
-        JSON.stringify({
-          error: `Image generation failed with status ${response.status}`,
-          details: errorText,
-          prompt: prompt
-        }),
-        {
-          status: response.status === 429 ? 429 : 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Parse the Imagen response
     const responseData = await response.json();
-    console.log('📦 Response data structure:', Object.keys(responseData));
-
-    // Extract image from Imagen response
-    // Imagen returns: { predictions: [{ bytesBase64Encoded: "..." }] }
     let imageUrl;
+
+    // Handle Imagen API response format
     if (responseData.predictions && responseData.predictions.length > 0) {
       const prediction = responseData.predictions[0];
-      if (prediction && prediction.bytesBase64Encoded) {
-        const base64Data = prediction.bytesBase64Encoded;
-        imageUrl = `data:image/png;base64,${base64Data}`;
-        console.log('🖼️ Image extracted from Imagen response (Nano Banana style)');
+      if (prediction.bytesBase64Encoded) {
+        imageUrl = `data:image/png;base64,${prediction.bytesBase64Encoded}`;
       }
     }
 
     if (!imageUrl) {
-      console.error('❌ Could not find image in Imagen response');
-      console.error('Response data:', JSON.stringify(responseData, null, 2));
       return new Response(
-        JSON.stringify({
-          error: 'Could not extract image from Google AI Studio Imagen response',
-          responseStructure: Object.keys(responseData),
-          prompt: prompt
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
+        JSON.stringify({ error: 'Could not extract image from response' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // If imageUrl is a URL (not base64), fetch and convert it
-    if (imageUrl.startsWith('http')) {
-      console.log('🌐 Fetching image from URL (Google AI Studio generated)...');
-      const imageResponse = await fetch(imageUrl);
-      
-      if (!imageResponse.ok) {
-        throw new Error(`Failed to fetch generated image from ${imageUrl}`);
-      }
-      const arrayBuffer = await imageResponse.arrayBuffer();
-      const sizeInMB = (arrayBuffer.byteLength / 1024 / 1024).toFixed(2);
-      console.log(`📦 Image size: ${sizeInMB} MB`);
-      if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
-        console.error('❌ Image too large:', sizeInMB, 'MB');
-        return new Response(
-          JSON.stringify({
-            error: 'Generated image is too large.',
-            size: `${sizeInMB} MB`
-          }),
-          {
-            status: 413,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-      const base64 = arrayBufferToBase64(arrayBuffer);
-      const contentType = imageResponse.headers.get('content-type') || 'image/png';
-      imageUrl = `data:${contentType};base64,${base64}`;
-    }
+    // Now upload to Cloudinary
+    const formData = new FormData();
+    formData.append('file', imageUrl); // This is your base64 image data
+    formData.append('upload_preset', 'YOUR_UPLOAD_PRESET');  // Set your upload preset (found in your Cloudinary settings)
 
-    console.log('✅ Image generated successfully with Google AI Studio Imagen (Nano Banana style)!');
-    return new Response(
-      JSON.stringify({
-        imageUrl,
-        textContent: prompt,
-        prompt,
-        model: 'nano-banana-imagen-3.0-generate-001'
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${btoa(CLOUDINARY_API_KEY + ':' + CLOUDINARY_API_SECRET)}`,
+      },
+      body: formData,
+    });
+
+    const cloudinaryData = await cloudinaryResponse.json();
+    if (cloudinaryResponse.ok) {
+      return new Response(
+        JSON.stringify({
+          imageUrl: cloudinaryData.secure_url,  // Cloudinary URL for the uploaded image
+          prompt,
+          message: 'Image successfully uploaded to Cloudinary!',
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    } else {
+      return new Response(
+        JSON.stringify({ error: 'Failed to upload image to Cloudinary', details: cloudinaryData }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
   } catch (error) {
-    console.error('❌ Error in generate-image function (Google AI Studio Nano Banana Imagen):', error);
-    console.error('Stack trace:', error.stack);
-    
-    const errorMessage = error instanceof Error ? error.message : 'Failed to generate image';
-    const errorStack = error instanceof Error ? error.stack : '';
-    
+    console.error('❌ Error generating or uploading image:', error);
     return new Response(
-      JSON.stringify({ 
-        error: errorMessage,
-        type: 'server_error',
-        details: errorStack
-      }),
+      JSON.stringify({ error: 'Server error occurred while generating/uploading image', details: error.message }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

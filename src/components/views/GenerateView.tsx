@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Loader2, ThumbsUp, ThumbsDown, Download, Maximize2, X } from "lucide-react";
+import { Loader2, ThumbsUp, ThumbsDown, Download, Maximize2, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface GeneratedImage {
@@ -18,9 +18,10 @@ interface GeneratedImage {
 interface GenerateViewProps {
   isGenerating: boolean;
   generatedImages: GeneratedImage[];
+  onDeleteImage?: (imageId: number) => void;
 }
 
-export function GenerateView({ isGenerating, generatedImages }: GenerateViewProps) {
+export function GenerateView({ isGenerating, generatedImages, onDeleteImage }: GenerateViewProps) {
   const latestImage = generatedImages[0];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
@@ -188,6 +189,16 @@ export function GenerateView({ isGenerating, generatedImages }: GenerateViewProp
                   >
                     <ThumbsDown className="w-5 h-5" />
                   </Button>
+                  {onDeleteImage && (
+                    <Button
+                      onClick={() => onDeleteImage(latestImage.id)}
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
