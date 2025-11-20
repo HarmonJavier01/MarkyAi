@@ -1,13 +1,33 @@
-import { useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, Check, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-interface OnboardingProps {
-  onComplete: (userData: unknown) => void;
+
+interface UserData {
+  name: string;
+  email: string;
+  role: string;
+  industry: string;
+  niche: string;
+  useCases: string[];
+  platforms: string[];
+  imageTypes: string[];
+  brandStyle: string[];
+  brandColors: string[];
+  goals: string[];
+  frequency: string;
+  skipped?: boolean;
 }
-export function Onboarding({ onComplete }: OnboardingProps) {
-  const [step, setStep] = useState(0);
+
+interface OnboardingProps {
+  onComplete: (userData: UserData) => void;
+  isEdit?: boolean;
+  initialData?: UserData;
+}
+export function Onboarding({ onComplete, isEdit = false, initialData }: OnboardingProps) {
+  const [step, setStep] = useState(isEdit ? -1 : 0);
+  const [editingStep, setEditingStep] = useState<number | null>(null);
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -24,7 +44,141 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   });
   const [otherIndustry, setOtherIndustry] = useState('');
   const [isOtherSelected, setIsOtherSelected] = useState(false);
+
+  useEffect(() => {
+    if (isEdit && initialData) {
+      setUserData(initialData);
+      setOtherIndustry(initialData.industry || '');
+      setIsOtherSelected(!['E-commerce', 'Food & Beverage', 'Real Estate', 'Health', 'Technology', 'Fashion & Beauty', 'Finance', 'Education', 'Travel', 'Services'].includes(initialData.industry));
+    }
+  }, [isEdit, initialData]);
   
+  const editSummary = {
+    title: "Edit Your Profile",
+    subtitle: "Review and update your preferences",
+    content: (
+      <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Role</h3>
+                <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {userData.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : 'Not set'}
+              </p>
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Industry</h3>
+                <Button variant="ghost" size="sm" onClick={() => setStep(2)}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">{userData.industry || 'Not set'}</p>
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Niche</h3>
+                <Button variant="ghost" size="sm" onClick={() => setStep(3)}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">{userData.niche || 'Not set'}</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Use Cases</h3>
+                <Button variant="ghost" size="sm" onClick={() => setStep(4)}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {userData.useCases.length > 0 ? (
+                  userData.useCases.map((useCase) => (
+                    <span key={useCase} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                      {useCase}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">Not set</p>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Platforms</h3>
+                <Button variant="ghost" size="sm" onClick={() => setStep(5)}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {userData.platforms.length > 0 ? (
+                  userData.platforms.map((platform) => (
+                    <span key={platform} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                      {platform}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">Not set</p>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Image Types</h3>
+                <Button variant="ghost" size="sm" onClick={() => setStep(6)}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {userData.imageTypes.length > 0 ? (
+                  userData.imageTypes.map((type) => (
+                    <span key={type} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                      {type}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">Not set</p>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Brand Style</h3>
+                <Button variant="ghost" size="sm" onClick={() => setStep(7)}>
+                  <Edit className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {userData.brandStyle.length > 0 ? (
+                  userData.brandStyle.map((style) => (
+                    <span key={style} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                      {style}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">Not set</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  };
+
   const steps = [
     {
       title: "Welcome to Marky AI Studio",

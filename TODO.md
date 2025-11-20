@@ -1,20 +1,9 @@
-# Switch from Firebase Auth to Neon Auth
+# TODO: Implement Edit Onboarding Feature
 
 ## Tasks
 
-- [x] Create src/lib/neon.ts to replace firebase.ts
-- [x] Update src/pages/Login.tsx to use Supabase auth
-- [x] Update src/pages/Signup.tsx to use Supabase auth
-- [x] Update src/App.tsx to use Supabase auth
-- [x] Update src/components/Sidebar.tsx to use Supabase auth
-- [x] Update src/components/MainApp.tsx to use Supabase auth
-- [x] Update src/pages/Index.tsx to use Supabase auth
-- [x] Update src/pages/ForgotPassword.tsx to use Supabase auth
-- [x] Remove Firebase dependency from package.json
-- [x] Test authentication flow
-- [x] Fix Stack Auth errors in Index.tsx
-- [x] Update user types throughout the app
-- [x] Fix user display in Sidebar component
-- [x] Removed ResetPassword page - using forgot-password page for reset flow
-- [x] Updated routing to remove /reset-password route
-- [x] Updated forgot password redirect to forgot-password page
+- [ ] Modify `src/components/Onboarding.tsx` to support edit mode with pre-filled data
+- [ ] Add `isEdit` prop and `initialData` prop to Onboarding component
+- [ ] Create a summary/edit view that shows all selected options and allows editing
+- [ ] Update `src/pages/Index.tsx` to pass existing userData and set isEdit=true for existing users
+- [ ] Test the edit onboarding functionality

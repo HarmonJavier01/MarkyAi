@@ -32,22 +32,22 @@ export default function Login() {
   };
 
   const handleGoogleSignIn = async () => {
-  setLoading(true);
-  try {
-    const { error } = await auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/`, // or `/dashboard` etc.
-      }
-    });
-    if (error) throw error;
-  } catch (error) {
-    console.error('Google sign-in error:', error);
-    alert(`Google sign-in failed: ${(error as Error).message}`);
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const { error } = await auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`, // or `/dashboard` etc.
+        }
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      alert(`Google sign-in failed: ${(error as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-purple via-surface-pink to-surface-blue flex items-center justify-center p-4">

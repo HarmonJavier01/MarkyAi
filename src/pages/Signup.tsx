@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
-import { auth, googleProvider } from "@/lib/neon";
+import { Eye, EyeOff, Mail, CheckCircle } from "lucide-react";
+import { auth } from "@/lib/neon";
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -14,6 +14,8 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,20 +26,48 @@ export default function Signup() {
     }
     setLoading(true);
     try {
-      const { error } = await auth.signUp({
+      const { data, error } = await auth.signUp({
         email,
         password,
         options: {
           data: {
             name: name,
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/`
         }
       });
+      
       if (error) throw error;
-      navigate('/');
+
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        // Email confirmation is enabled - show verification message
+        setRegisteredEmail(email);
+        setShowVerificationMessage(true);
+      } else {
+        // Email confirmation is disabled or user is auto-confirmed
+        navigate('/');
+      }
     } catch (error) {
       console.error('Signup error:', error);
       alert(`Signup failed: ${(error as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setLoading(true);
+    try {
+      const { error } = await auth.resend({
+        type: 'signup',
+        email: registeredEmail,
+      });
+      if (error) throw error;
+      alert('Verification email sent! Please check your inbox.');
+    } catch (error) {
+      console.error('Resend error:', error);
+      alert(`Failed to resend: ${(error as Error).message}`);
     } finally {
       setLoading(false);
     }
@@ -57,7 +87,6 @@ export default function Signup() {
         }
       });
       if (error) throw error;
-      // OAuth will redirect, so we don't navigate here
     } catch (error) {
       console.error('Google sign-in error:', error);
       alert(`Google sign-in failed: ${(error as Error).message}`);
@@ -66,6 +95,61 @@ export default function Signup() {
     }
   };
 
+  // Show verification message UI
+  if (showVerificationMessage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-surface-purple via-surface-pink to-surface-blue flex items-center justify-center p-4">
+        <div className="bg-background rounded-2xl shadow-xl max-w-md w-full p-8">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-white mb-4">
+              <Mail className="w-8 h-8" />
+            </div>
+            <CheckCircle className="w-12 h-12 mx-auto text-green-500 mb-4" />
+            <h1 className="text-3xl font-bold mb-2">Check Your Email</h1>
+            <p className="text-muted-foreground mb-6">
+              We've sent a verification link to:
+            </p>
+            <p className="text-lg font-semibold mb-6">{registeredEmail}</p>
+            <p className="text-sm text-muted-foreground mb-6">
+              Please check your inbox and click the verification link to activate your account.
+            </p>
+
+            <div className="space-y-3">
+              <Button
+                onClick={handleResendVerification}
+                variant="outline"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? 'Sending...' : 'Resend Verification Email'}
+              </Button>
+
+              <Button
+                onClick={() => navigate('/login')}
+                className="w-full bg-gradient-to-r from-primary to-accent"
+              >
+                Go to Login
+              </Button>
+            </div>
+
+            <div className="mt-6 p-4 bg-muted rounded-lg">
+              <p className="text-xs text-muted-foreground">
+                <strong>Didn't receive the email?</strong>
+                <br />
+                • Check your spam/junk folder
+                <br />
+                • Make sure you entered the correct email
+                <br />
+                • Click "Resend" to try again
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular signup form
   return (
     <div className="min-h-screen bg-gradient-to-br from-surface-purple via-surface-pink to-surface-blue flex items-center justify-center p-4">
       <div className="bg-background rounded-2xl shadow-xl max-w-md w-full p-8">
@@ -115,6 +199,7 @@ export default function Signup() {
                 placeholder="Enter your password"
                 className="pr-10"
                 required
+                minLength={6}
               />
               <button
                 type="button"
@@ -129,6 +214,7 @@ export default function Signup() {
                 )}
               </button>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">Must be at least 6 characters</p>
           </div>
 
           <div>

@@ -1,16 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client directly
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://yasedtunkmdxyziojxqh.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_N-_nJVqMJRS-AxR3lFCi6A_ZuLBN8G';
+const SUPABASE_URL = import.meta.env.VITE_NEON_SUPABASE_URL || 'https://yasedtunkmdxyziojxqh.supabase.co';
+const SUPABASE_KEY = import.meta.env.VITE_NEON_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlhc2VkdHVua21keHl6aW9qeHFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMDM4MjEsImV4cCI6MjA3ODU3OTgyMX0.EbL40iawPJHlXG6UCfwe4v7UONOmwVX5UpRCGhIj8jg';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export interface GeneratedImage {
   id: string;
@@ -25,82 +18,54 @@ export interface GeneratedImage {
   };
 }
 
-export class FirestoreService {
-  private static instance: FirestoreService;
+class FirestoreService {
   private userId: string | null = null;
-
-  static getInstance(): FirestoreService {
-    if (!FirestoreService.instance) {
-      FirestoreService.instance = new FirestoreService();
-    }
-    return FirestoreService.instance;
-  }
 
   setUserId(userId: string) {
     this.userId = userId;
   }
 
-  async saveGeneratedImage(image: Omit<GeneratedImage, 'id'>): Promise<string> {
+  async saveGeneratedImage(image: Omit<GeneratedImage, 'id'>): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    try {
-      const { data, error } = await supabase
-        .from('generated_images')
-        .insert({
-          ...image,
-          user_id: this.userId,
-        })
-        .select()
-        .single();
+    const { error } = await supabase
+      .from('generated_images')
+      .insert({
+        userId: this.userId,
+        prompt: image.prompt,
+        imageUrl: image.imageUrl,
+        textContent: image.textContent,
+        timestamp: image.timestamp,
+        settings: image.settings,
+      });
 
-      if (error) throw error;
-      return data.id;
-    } catch (error) {
-      console.error('Error saving image:', error);
-      throw error;
-    }
+    if (error) throw error;
   }
 
   async getGeneratedImages(): Promise<GeneratedImage[]> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    try {
-      const { data, error } = await supabase
-        .from('generated_images')
-        .select('*')
-        .eq('user_id', this.userId)
-        .order('timestamp', { ascending: false });
+    const { data, error } = await supabase
+      .from('generated_images')
+      .select('*')
+      .eq('userId', this.userId)
+      .order('timestamp', { ascending: false });
 
-      if (error) throw error;
-      return data.map(item => ({
-        id: item.id,
-        prompt: item.prompt,
-        imageUrl: item.image_url,
-        textContent: item.text_content,
-        timestamp: item.timestamp,
-        settings: item.settings
-      }));
-    } catch (error) {
-      console.error('Error fetching images:', error);
-      throw error;
-    }
+    if (error) throw error;
+    return data || [];
   }
 
-  async deleteGeneratedImage(imageId: string): Promise<void> {
+  async deleteGeneratedImage(id: string): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    try {
-      const { error } = await supabase
-        .from('generated_images')
-        .delete()
-        .eq('id', imageId);
+    const { error } = await supabase
+      .from('generated_images')
+      .delete()
+      .eq('id', id)
+      .eq('userId', this.userId);
 
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error deleting image:', error);
-      throw error;
-    }
+    if (error) throw error;
   }
 }
 
-export const firestoreService = FirestoreService.getInstance();
+export const firestoreService = new FirestoreService();
