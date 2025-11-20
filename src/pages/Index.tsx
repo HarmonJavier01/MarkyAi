@@ -73,11 +73,11 @@ const Index = () => {
   };
 
   const handleOnboardingComplete = (data: UserData) => {
+    setUserData(data);
+    setShowOnboarding(false);
     if (user) {
       localStorage.setItem(`marky_onboarding_complete_${user.id}`, 'true');
       localStorage.setItem(`marky_user_data_${user.id}`, JSON.stringify(data));
-      setUserData(data);
-      setShowOnboarding(false);
     }
   };
 

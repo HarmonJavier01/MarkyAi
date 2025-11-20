@@ -6,19 +6,7 @@ import { HomeView } from "@/components/views/HomeView";
 import { GenerateView } from "@/components/views/GenerateView";
 import { HistoryView } from "@/components/views/HistoryView";
 import { User } from "@supabase/supabase-js";
-import { createClient } from '@supabase/supabase-js';
-
-// Use the same Supabase client as auth (Neon)
-const SUPABASE_URL = import.meta.env.VITE_NEON_SUPABASE_URL || 'https://yasedtunkmdxyziojxqh.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_NEON_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlhc2VkdHVua21keHl6aW9qeHFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMDM4MjEsImV4cCI6MjA3ODU3OTgyMX0.EbL40iawPJHlXG6UCfwe4v7UONOmwVX5UpRCGhIj8jg';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  },
-});
+import { supabase } from "@/lib/neon";
 import { firestoreService, GeneratedImage as FirestoreImage } from "@/lib/firestore";
 
 interface UserData {
@@ -38,6 +26,7 @@ interface UserData {
 
 interface GeneratedImage {
   id: number;
+  sessionId: string;
   prompt: string;
   imageUrl: string;
   textContent?: string;
@@ -57,9 +46,10 @@ interface MainAppProps {
 
 export function MainApp({ user, userData: initialUserData, onResetOnboarding }: MainAppProps) {
   const [currentView, setCurrentView] = useState('home');
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState(() => localStorage.getItem('currentPrompt') || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState(() => crypto.randomUUID());
   const [settings, setSettings] = useState({
     temperature: 1,
     outputType: 'General',
@@ -87,6 +77,7 @@ export function MainApp({ user, userData: initialUserData, onResetOnboarding }: 
       // Convert Firestore images to local format
       const localImages: GeneratedImage[] = firestoreImages.map(img => ({
         id: parseInt(img.id) || Date.now(), // Use timestamp as fallback
+        sessionId: img.sessionId,
         prompt: img.prompt,
         imageUrl: img.imageUrl,
         textContent: img.textContent,
@@ -126,6 +117,7 @@ const handleGenerate = async () => {
 
     const newImage = {
       id: Date.now(),
+      sessionId: currentSessionId,
       prompt,
       imageUrl: data.imageUrl,
       textContent: prompt,
@@ -136,6 +128,7 @@ const handleGenerate = async () => {
     setGeneratedImages([newImage, ...generatedImages]);
     
     await firestoreService.saveGeneratedImage({
+      sessionId: newImage.sessionId,
       prompt: newImage.prompt,
       imageUrl: newImage.imageUrl,
       textContent: newImage.textContent,
@@ -143,7 +136,9 @@ const handleGenerate = async () => {
       settings: newImage.settings
     });
 
+    // Clear the prompt after successful generation
     setPrompt('');
+    localStorage.removeItem('currentPrompt');
   } catch (error) {
     console.error('❌ Failed to generate image:', error);
     alert(`Failed to generate image: ${error.message}`);

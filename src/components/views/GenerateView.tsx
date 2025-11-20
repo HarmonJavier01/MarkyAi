@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 
 interface GeneratedImage {
   id: number;
+  sessionId: string;
   prompt: string;
   imageUrl: string;
   textContent?: string;

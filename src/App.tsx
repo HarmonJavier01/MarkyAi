@@ -47,7 +47,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         {/* <Route path="/reset-password" element={<ResetPassword />} /> */}
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={user ? <Index /> : <Login />} />
       </Routes>
     </BrowserRouter>
   );

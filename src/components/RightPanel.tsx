@@ -102,7 +102,7 @@ export function RightPanel({ settings, setSettings }: RightPanelProps) {
             </Select>
           </div>
         </div>
-        <div className="pt-6 border-t border-border">
+        {/* <div className="pt-6 border-t border-border">
           <h3 className="font-medium mb-2">Quick Tips</h3>
           <ul className="text-sm text-muted-foreground space-y-2">
             <li>• Be specific about colors, style, and mood</li>
@@ -110,7 +110,7 @@ export function RightPanel({ settings, setSettings }: RightPanelProps) {
             <li>• Use descriptive adjectives</li>
             <li>• Reference the image type you need</li>
           </ul>
-        </div>
+        </div> */}
       </div>
     </div>
   );

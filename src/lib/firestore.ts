@@ -7,6 +7,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export interface GeneratedImage {
   id: string;
+  sessionId: string;
   prompt: string;
   imageUrl: string;
   textContent?: string;
@@ -49,6 +50,20 @@ class FirestoreService {
       .from('generated_images')
       .select('*')
       .eq('userId', this.userId)
+      .order('timestamp', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  async getImagesBySession(sessionId: string): Promise<GeneratedImage[]> {
+    if (!this.userId) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('generated_images')
+      .select('*')
+      .eq('userId', this.userId)
+      .eq('sessionId', sessionId)
       .order('timestamp', { ascending: false });
 
     if (error) throw error;
