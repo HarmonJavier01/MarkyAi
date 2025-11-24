@@ -14,6 +14,9 @@ dist-ssr
 
 # Environment variables
 .env
+.env.example
+# SendGrid API Key
+SENDGRID_API_KEY
 
 # Editor directories and files
 .vscode/*
