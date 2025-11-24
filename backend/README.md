@@ -4,12 +4,12 @@ A robust email service built with Node.js, Express, and SendGrid for sending var
 
 ## Features
 
-- 📧 Multiple email templates (welcome, verification, password reset, etc.)
-- 🎨 Beautiful HTML email templates with responsive design
-- 🔒 Secure API with validation
-- 🚀 Easy integration with frontend applications
-- 📊 Health check endpoint
-- 🛡️ CORS support for cross-origin requests
+- 📧 Multiple email templates (welcome, verification, password reset, etc.) - Icon: Envelope
+- 🎨 Beautiful HTML email templates with responsive design - Icon: Artist Palette
+- 🔒 Secure API with validation - Icon: Lock
+- 🚀 Easy integration with frontend applications - Icon: Rocket
+- 📊 Health check endpoint - Icon: Bar Chart
+- 🛡️ CORS support for cross-origin requests - Icon: Shield
 
 ## Setup
 
