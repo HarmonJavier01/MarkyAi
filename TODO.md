@@ -1,9 +1,17 @@
-# TODO: Implement Edit Onboarding Feature
+# Email Service Fix - TODO List
 
-## Tasks
+## Current Status
 
-- [ ] Modify `src/components/Onboarding.tsx` to support edit mode with pre-filled data
-- [ ] Add `isEdit` prop and `initialData` prop to Onboarding component
-- [ ] Create a summary/edit view that shows all selected options and allows editing
-- [ ] Update `src/pages/Index.tsx` to pass existing userData and set isEdit=true for existing users
-- [ ] Test the edit onboarding functionality
+- [x] Analyzed email architecture and identified issues
+- [x] Updated frontend sendEmail.ts to use backend API instead of Supabase Edge Function
+- [ ] Create/update environment variables for SendGrid configuration
+- [ ] Test backend email server functionality
+- [ ] Verify email delivery with test emails
+- [ ] Update any remaining references to old email methods
+
+## Next Steps
+
+1. Set up proper environment variables in backend/.env
+2. Ensure backend server can start without errors
+3. Test email sending functionality
+4. Monitor logs for any remaining issues

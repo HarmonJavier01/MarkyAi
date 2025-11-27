@@ -1,3 +1,4 @@
+// src/pages/Signup.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Mail, CheckCircle } from "lucide-react";
 import { auth } from "@/lib/neon";
+import { sendEmail, emailTemplates } from "@/lib/sendEmail"; // ✅ ADD THIS LINE
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -38,6 +40,25 @@ export default function Signup() {
       });
       
       if (error) throw error;
+
+      // ✅ ADD THIS BLOCK - Send welcome email (don't block signup if it fails)
+      if (data.user) {
+        console.log('Sending welcome email to:', email);
+        sendEmail({
+          to: email,
+          ...emailTemplates.welcome(name)
+        }).then(success => {
+          if (success) {
+            console.log('Welcome email sent successfully!');
+          } else {
+            console.warn('Welcome email failed to send, but signup was successful');
+          }
+        }).catch(err => {
+          console.error('Welcome email error:', err);
+          // Don't show error to user - signup was successful
+        });
+      }
+      // ✅ END OF ADDED BLOCK
 
       // Check if email confirmation is required
       if (data.user && !data.session) {

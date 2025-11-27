@@ -1,11 +1,11 @@
 # Marky AI Studio
 
-An AI-powered image generation platform built with React, TypeScript, Firebase, and Supabase. Generate stunning images using Google Gemini 2.5 Flash with an intuitive web interface.
+An AI-powered image generation platform built with React, TypeScript, and Supabase. Generate stunning images using Google Gemini 2.5 Flash with an intuitive web interface.
 
 ## 🚀 Features
 
 - **AI Image Generation**: Create images using Google Gemini 2.5 Flash
-- **User Authentication**: Secure login/signup with Firebase Authentication
+- **User Authentication**: Secure login/signup with Supabase Authentication
 - **Password Recovery**: Forgot password functionality
 - **Responsive Design**: Modern, clean UI that works on all devices
 - **Image History**: View and manage your generated images
@@ -24,8 +24,7 @@ An AI-powered image generation platform built with React, TypeScript, Firebase, 
 
 ### Backend & Services
 
-- **Firebase** - Authentication and user management
-- **Supabase** - Database and Edge Functions
+- **Supabase** - Authentication, database, and Edge Functions
 - **Google Gemini 2.5 Flash** - AI image generation
 
 ## 📋 Prerequisites
@@ -56,14 +55,6 @@ Before you begin, ensure you have the following installed:
    Create a `.env.local` file in the root directory and add your environment variables:
 
    ```env
-   # Firebase Configuration
-   VITE_FIREBASE_API_KEY=your_firebase_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-
    # Supabase Configuration
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -155,12 +146,6 @@ MarkyAi/
 
 ## 🔧 Configuration
 
-### Firebase Setup
-
-1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-2. Enable Authentication with Email/Password provider
-3. Copy your Firebase config to `.env.local`
-
 ### Supabase Setup
 
 1. Create a Supabase project
@@ -224,7 +209,7 @@ If you encounter any issues:
 ## 🙏 Acknowledgments
 
 - [Google Gemini](https://ai.google.dev/) for AI image generation
-- [Firebase](https://firebase.google.com/) for authentication
+- [Supabase](https://supabase.com/) for authentication
 - [Supabase](https://supabase.com/) for backend services
 - [React](https://reactjs.org/) for the UI framework
 - [Tailwind CSS](https://tailwindcss.com/) for styling

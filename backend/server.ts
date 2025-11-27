@@ -1,7 +1,8 @@
-const express = require('express');
-const sgMail = require('@sendgrid/mail');
-const cors = require('cors');
-const dotenv = require('dotenv');
+import express, { Request, Response } from 'express';
+import sgMail from '@sendgrid/mail';
+import { MailDataRequired } from '@sendgrid/mail';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -9,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Initialize SendGrid
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 // Middleware
 app.use(cors({
@@ -17,13 +18,42 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Define request body type
+interface SendEmailRequest {
+  to: string;
+  subject?: string;
+  html?: string;
+  text?: string;
+  templateId?: string;
+  dynamicTemplateData?: Record<string, unknown>;
+}
+
+// Define response types
+interface SuccessResponse {
+  success: true;
+  message: string;
+}
+
+interface ErrorResponse {
+  error: string;
+  details?: string;
+}
+
+interface HealthResponse {
+  status: string;
+  message: string;
+}
+
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response<HealthResponse>) => {
   res.json({ status: 'ok', message: 'Email API is running' });
 });
 
 // Send email endpoint
-app.post('/api/send-email', async (req, res) => {
+app.post('/api/send-email', async (
+  req: Request<object, SuccessResponse | ErrorResponse, SendEmailRequest>,
+  res: Response<SuccessResponse | ErrorResponse>
+) => {
   try {
     const { to, subject, html, text, templateId, dynamicTemplateData } = req.body;
 
@@ -33,10 +63,10 @@ app.post('/api/send-email', async (req, res) => {
     }
 
     // Prepare email message
-    const msg = {
+    const msg: Partial<MailDataRequired> = {
       to,
       from: {
-        email: process.env.SENDGRID_FROM_EMAIL || 'hakdoglang112@gmail.com',
+        email: process.env.SENDGRID_FROM_EMAIL!,
         name: 'Marky AI Studio'
       }
     };
@@ -55,24 +85,24 @@ app.post('/api/send-email', async (req, res) => {
     }
 
     // Send email
-    await sgMail.send(msg);
-
+    await sgMail.send(msg as MailDataRequired);
+    
     console.log(`Email sent successfully to ${to}`);
     res.json({ success: true, message: 'Email sent successfully' });
   } catch (error) {
     console.error('SendGrid error:', error);
-
+    
     if (error instanceof Error) {
       console.error('Error message:', error.message);
     }
-
+    
     // Type guard for SendGrid specific errors
     if (typeof error === 'object' && error !== null && 'response' in error) {
-      const sgError = error;
+      const sgError = error as { response: { body: unknown } };
       console.error('SendGrid response:', sgError.response.body);
     }
-
-    res.status(500).json({
+    
+    res.status(500).json({ 
       error: 'Failed to send email',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -82,5 +112,5 @@ app.post('/api/send-email', async (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`✅ Email API server running on http://localhost:${PORT}`);
-  console.log(`✅ SendGrid configured with: ${process.env.SENDGRID_FROM_EMAIL || 'hakdoglang112@gmail.com'}`);
+  console.log(`✅ SendGrid configured with: ${process.env.SENDGRID_FROM_EMAIL}`);
 });

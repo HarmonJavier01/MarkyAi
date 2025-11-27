@@ -23,6 +23,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const supabaseUrl = 'https://yasedtunkmdxyziojxqh.supabase.co'
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
 serve(async (req) => {
   // Handle CORS
   if (req.method === 'OPTIONS') {
@@ -33,10 +37,8 @@ serve(async (req) => {
     const requestData: RequestData = await req.json()
     const { type, ...data } = requestData
 
-    // SendGrid API key from environment
-    const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY')
-    if (!SENDGRID_API_KEY) {
-      throw new Error('SENDGRID_API_KEY environment variable not set')
+    if (!supabaseAnonKey || !supabaseServiceRoleKey) {
+      throw new Error('SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY environment variables not set')
     }
 
     let emailData: EmailData
@@ -216,30 +218,25 @@ serve(async (req) => {
         throw new Error(`Unknown email type: ${type}`)
     }
 
-    // Send email via SendGrid
-    const sendGridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    // Send email via Supabase
+    const supabaseResponse = await fetch(`${supabaseUrl}/rest/v1/send_email`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${SENDGRID_API_KEY}`,
+        'Authorization': `Bearer ${supabaseServiceRoleKey}`,
+        'apikey': supabaseAnonKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        personalizations: [{
-          to: [{ email: emailData.to }],
-        }],
-        from: { email: emailData.from },
+        to: emailData.to,
         subject: emailData.subject,
-        content: [{
-          type: 'text/html',
-          value: emailData.html,
-        }],
+        html: emailData.html,
       }),
     })
 
-    if (!sendGridResponse.ok) {
-      const errorText = await sendGridResponse.text()
-      console.error('SendGrid API error:', sendGridResponse.status, errorText)
-      throw new Error(`SendGrid API error: ${sendGridResponse.status} - ${errorText}`)
+    if (!supabaseResponse.ok) {
+      const errorText = await supabaseResponse.text()
+      console.error('Supabase email API error:', supabaseResponse.status, errorText)
+      throw new Error(`Supabase email API error: ${supabaseResponse.status} - ${errorText}`)
     }
 
     console.log(`Email sent successfully to ${emailData.to} for type: ${type}`)
